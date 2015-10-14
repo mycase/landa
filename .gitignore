@@ -1,0 +1,11 @@
+*~
+*.egg
+*.pyc
+.coverage
+*.egg-info/
+.*eggs/
+_build/
+build/
+dist/
+.DS_Store
+
