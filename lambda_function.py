@@ -1,7 +1,9 @@
 from __future__ import print_function
 
+from fnmatch import fnmatch
 import json
 
+import auth
 import config
 
 VERBOSE = False
@@ -11,7 +13,8 @@ def lambda_handler(event, context, debug=False):
     if debug:
         import os
         import sys
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'dependencies'))
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__),
+                        'dependencies'))
         print(os.path.join(os.path.dirname(__file__), 'dependencies'))
 
     from github3 import login
@@ -30,7 +33,8 @@ def lambda_handler(event, context, debug=False):
 
     action = message.get('action')
 
-    if 'pull_request' not in message or action != 'opened':
+    if 'pull_request' not in message or action not in ('opened',
+                                                       'synchronize'):
         print('Action: {}. Contains pull_request object: {}'.format(
             action, 'pull_request' in message))
         return
@@ -55,15 +59,37 @@ def lambda_handler(event, context, debug=False):
         print('Ignoring pull requests from {}'.format(author))
         return
 
-    if debug:
-        print("DONE")
-        return
-
-    gh = login(config.user,
-               password=config.token)
+    gh = login(auth.user, password=auth.token)
 
     issue = gh.issue(target_repo_owner, target_repo, pr_id)
+    pr = gh.pull_request(target_repo_owner, target_repo, pr_id)
+    files_changed = pr.files()
+    current_labels = set(str(l) for l in issue.original_labels)
 
-    issue.create_comment(config.comment)
+    # Calculate which labels to add and remove
+    label_tests = {label: (author in users) for label, users
+                   in config.team_labels.items()}
+    label_tests.update(
+        {label: any(fnmatch(pfile.filename, pattern) for pfile
+                    in files_changed)
+         for label, pattern in config.file_pattern_labels.items()})
 
-    print('Added comment to pull request {}'.format(pr_id))
+    # Find labels to remove:
+    remove_labels = current_labels & set(label for label, to_add
+                                         in label_tests.items() if not to_add)
+
+    # Labels to add:
+    add_labels = (set(lab for lab, to_add in label_tests.items() if to_add) -
+                  current_labels)
+
+    # new set of labels:
+    new_labels = (current_labels - remove_labels) | add_labels
+
+    if new_labels:
+        print('Changing labels on PR#{0} from {1} to {2}'.format(
+            pr.number, ', '.join(current_labels), ', '.join(new_labels)))
+
+        if not debug:
+            issue.replace_labels(list(new_labels))
+
+    print('Handled pull request {}'.format(pr_id))

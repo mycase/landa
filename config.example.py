@@ -1,15 +1,24 @@
 # Copy this file to config.py
-user = 'balloobbot'
-# Get at https://github.com/settings/tokens
-token = 'SOME_SECRET_TOKEN'
 
 # Repo/branch to monitor
-repo_owner = 'balloob'
-repo = 'home-assistant'
-branch = 'dev'
+repo_owner = 'appfolio'
+repo = 'landa'
+branch = 'master'
 
-ignore_login = ['balloob']
+ignore_login = ['example_user']
 
-message = """
-Thanks for submitting a PR!
-"""
+team_labels = {
+  '#Awesome': [
+    'balloob'
+    'balloobbot',
+  ],
+  'TeamMOM': [
+    'farcy',
+  ]
+}
+
+file_pattern_labels = {
+  'db_review': 'db/*',
+  'css_review': 'app/assets/stylesheets/global/*',
+  'js_review': 'node_modules/*',
+}
