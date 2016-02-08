@@ -1,9 +1,10 @@
 Landa: Lambda function to label PRs
 ===================================
 
-A Python 2.7 lambda function to automatically label pull requests:
+A Python 2.7 lambda function to automatically process pull requests:
  - Team labels: apply labels based on the author of the pull request
  - Review labels: apply labels based on path matches against files changed.
+ - Stub CI status for commits while waiting for CI to pick it up
 
 ## Getting started
 

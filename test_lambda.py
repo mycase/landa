@@ -421,7 +421,7 @@ github_event = """
 """
 
 for search, replace in {
-  'pr_id': 2315,
+  'pr_id': str(pr_id),
   'pr_author': pr_author,
   'repo_owner': config.repo_owner,
   'repo': config.repo,

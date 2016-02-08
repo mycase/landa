@@ -22,3 +22,10 @@ file_pattern_labels = {
   'css_review': 'app/assets/stylesheets/global/*',
   'js_review': 'node_modules/*',
 }
+
+commit_status = {
+  'Farcy': 'To be done',
+  'CI - Jest': 'To be done',
+  'CI - Unit/Functional/Integration': 'To be done',
+  'CI - Selenium': 'To be done',
+}

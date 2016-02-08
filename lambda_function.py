@@ -92,4 +92,16 @@ def lambda_handler(event, context, debug=False):
         if not debug:
             issue.replace_labels(list(new_labels))
 
+    if config.commit_status:
+        repo = gh.repository(target_repo_owner, target_repo)
+        sha = list(pr.commits())[-1].sha
+
+        for context, description in config.commit_status.items():
+            if debug:
+                print('Settting {} status {} to {}: {}'.format(
+                    sha, context, 'pending', description))
+            else:
+                repo.create_status(sha, 'pending', context=context,
+                                   description=description)
+
     print('Handled pull request {}'.format(pr_id))
