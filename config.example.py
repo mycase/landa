@@ -1,4 +1,6 @@
 # Copy this file to config.py
+# Base branch is the targetted branch
+# Head branch is the branch with changes
 
 # Repo/branch to monitor
 repo_owner = 'appfolio'
@@ -8,7 +10,7 @@ repo = 'landa'
 ignore_login = ['example_user']
 
 # PRs targetting these branches are ignored
-ignore_target_branch = ['master']
+ignore_base_branch = ['master']
 
 team_labels = {
   '#Awesome': [
@@ -24,6 +26,14 @@ file_pattern_labels = {
   'db_review': 'db/*',
   'css_review': 'app/assets/stylesheets/global/*',
   'js_review': 'node_modules/*',
+}
+
+base_branch_labels = {
+  'release/*': 'trolololol',
+}
+
+head_branch_labels = {
+  'release': 'release/*',
 }
 
 commit_status = {

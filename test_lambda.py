@@ -2,9 +2,10 @@ import lambda_function
 
 import config
 
-pr_id = 2315
-pr_author = 'farcy'
-target_branch = 'master'
+pr_id = 2324
+pr_author = 'balloob'
+base_branch = 'release/78'
+head_branch = 'feature/fix-X'
 
 github_event = """
 {
@@ -54,8 +55,8 @@ github_event = """
     "comments_url": "https://api.github.com/repos/{repo_owner}/{repo}/issues/1/comments",
     "statuses_url": "https://api.github.com/repos/{repo_owner}/{repo}/statuses/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
     "head": {
-      "label": "{pr_author}:changes",
-      "ref": "changes",
+      "label": "{pr_author}:{head_branch}",
+      "ref": "{head_branch}",
       "sha": "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
       "user": {
         "login": "{pr_author}",
@@ -161,12 +162,12 @@ github_event = """
         "forks": 0,
         "open_issues": 1,
         "watchers": 0,
-        "default_branch": "{branch}"
+        "default_branch": "{base_branch}"
       }
     },
     "base": {
-      "label": "{repo_owner}:{branch}",
-      "ref": "{branch}",
+      "label": "{repo_owner}:{base_branch}",
+      "ref": "{base_branch}",
       "sha": "9049f1265b7d61be4a8904a9a27120d2064dab3b",
       "user": {
         "login": "{repo_owner}",
@@ -272,7 +273,7 @@ github_event = """
         "forks": 0,
         "open_issues": 1,
         "watchers": 0,
-        "default_branch": "{branch}"
+        "default_branch": "{base_branch}"
       }
     },
     "_links": {
@@ -426,7 +427,8 @@ for search, replace in {
   'pr_author': pr_author,
   'repo_owner': config.repo_owner,
   'repo': config.repo,
-  'branch': target_branch,
+  'base_branch': base_branch,
+  'head_branch': head_branch,
 }.items():
     github_event = github_event.replace('{' + search + '}', replace)
 

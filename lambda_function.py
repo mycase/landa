@@ -45,17 +45,18 @@ def lambda_handler(event, context, debug=False):
 
     author = message['pull_request']['user']['login']
 
-    target_repo_owner = message['pull_request']['base']['repo']['owner']['login']
-    target_repo = message['pull_request']['base']['repo']['name']
-    target_branch = message['pull_request']['base']['ref']
+    base_repo_owner = message['pull_request']['base']['repo']['owner']['login']
+    base_repo = message['pull_request']['base']['repo']['name']
+    base_branch = message['pull_request']['base']['ref']
+    head_branch = message['pull_request']['head']['ref']
 
-    if target_repo_owner != config.repo_owner or target_repo != config.repo:
+    if base_repo_owner != config.repo_owner or base_repo != config.repo:
         print("Got event for unexpected repo {}/{}".format(
-            target_repo_owner, target_repo))
+            base_repo_owner, base_repo))
         return
 
-    if target_branch in config.ignore_target_branch:
-        print('PR is targetting {} branch, aborting'.format(target_branch))
+    if base_branch in config.ignore_base_branch:
+        print('PR is targetting {} branch, aborting'.format(base_branch))
         return
 
     if author in config.ignore_login:
@@ -64,18 +65,28 @@ def lambda_handler(event, context, debug=False):
 
     gh = login(auth.user, password=auth.token)
 
-    issue = gh.issue(target_repo_owner, target_repo, pr_id)
-    pr = gh.pull_request(target_repo_owner, target_repo, pr_id)
+    issue = gh.issue(base_repo_owner, base_repo, pr_id)
+    pr = gh.pull_request(base_repo_owner, base_repo, pr_id)
     files_changed = pr.files()
     current_labels = set(str(l) for l in issue.original_labels)
 
     # Calculate which labels to add and remove
+    # Team Labels
     label_tests = {label: (author in users) for label, users
                    in config.team_labels.items()}
+    # File Pattern Labels
     label_tests.update(
         {label: any(fnmatch(pfile.filename, pattern) for pfile
-                    in files_changed)
+                    in files_changed) or label_tests.get(label, False)
          for label, pattern in config.file_pattern_labels.items()})
+    # Base Branch Labels
+    label_tests.update(
+        {label: fnmatch(base_branch, pattern) or label_tests.get(label, False)
+         for label, pattern in config.base_branch_labels.items()})
+    # Head Branch Labels
+    label_tests.update(
+        {label: fnmatch(head_branch, pattern) or label_tests.get(label, False)
+         for label, pattern in config.head_branch_labels.items()})
 
     # Find labels to remove:
     remove_labels = current_labels & set(label for label, to_add
@@ -96,7 +107,7 @@ def lambda_handler(event, context, debug=False):
             issue.replace_labels(list(new_labels))
 
     if config.commit_status:
-        repo = gh.repository(target_repo_owner, target_repo)
+        repo = gh.repository(base_repo_owner, base_repo)
         sha = list(pr.commits())[-1].sha
 
         for context, description in config.commit_status.items():
