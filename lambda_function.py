@@ -56,11 +56,12 @@ def lambda_handler(event, context, debug=False):
         return
 
     if base_branch in config.ignore_base_branch:
-        print('PR is targetting {} branch, aborting'.format(base_branch))
+        print('PR {} is targetting {} branch, aborting'.format(pr_id,
+                                                               base_branch))
         return
 
     if author in config.ignore_login:
-        print('Ignoring pull requests from {}'.format(author))
+        print('Ignoring pull request {} from {}'.format(pr_id, author))
         return
 
     gh = login(auth.user, password=auth.token)
