@@ -4,6 +4,7 @@ import config
 
 pr_id = 2315
 pr_author = 'farcy'
+target_branch = 'master'
 
 github_event = """
 {
@@ -165,7 +166,7 @@ github_event = """
     },
     "base": {
       "label": "{repo_owner}:{branch}",
-      "ref": "qa",
+      "ref": "{branch}",
       "sha": "9049f1265b7d61be4a8904a9a27120d2064dab3b",
       "user": {
         "login": "{repo_owner}",
@@ -425,7 +426,7 @@ for search, replace in {
   'pr_author': pr_author,
   'repo_owner': config.repo_owner,
   'repo': config.repo,
-  'branch': config.branch,
+  'branch': target_branch,
 }.items():
     github_event = github_event.replace('{' + search + '}', replace)
 

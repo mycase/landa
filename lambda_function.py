@@ -51,7 +51,7 @@ def lambda_handler(event, context, debug=False):
             target_repo_owner, target_repo))
         return
 
-    if target_branch != config.branch:
+    if target_branch in config.ignore_target_branch:
         print('PR is targetting {} branch, aborting'.format(target_branch))
         return
 

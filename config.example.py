@@ -3,9 +3,12 @@
 # Repo/branch to monitor
 repo_owner = 'appfolio'
 repo = 'landa'
-branch = 'master'
 
+# PRs from these users are ignored
 ignore_login = ['example_user']
+
+# PRs targetting these branches are ignored
+ignore_target_branch = ['master']
 
 team_labels = {
   '#Awesome': [
