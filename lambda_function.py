@@ -85,7 +85,7 @@ def lambda_handler(event, context, debug=False):
     # new set of labels:
     new_labels = (current_labels - remove_labels) | add_labels
 
-    if new_labels:
+    if new_labels != current_labels:
         print('Changing labels on PR#{0} from {1} to {2}'.format(
             pr.number, ', '.join(current_labels), ', '.join(new_labels)))
 
