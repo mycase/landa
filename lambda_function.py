@@ -31,15 +31,18 @@ def lambda_handler(event, context, debug=False):
         if VERBOSE:
             print('API: ' + json.dumps(event, indent=2))
 
-    action = message.get('action')
-
-    if 'pull_request' not in message or action not in ('opened',
-                                                       'synchronize'):
-        print('Action: {}. Contains pull_request object: {}'.format(
-            action, 'pull_request' in message))
+    if 'pull_request' not in message:
+        print('Not a PR event. Aborting')
         return
 
-    pr_id = message['number']
+    action = message.get('action')
+    pr_id = message.get('number')
+
+    if action not in ('opened', 'synchronize'):
+        print('Not handling {} action for Pull Request {}'.format(action,
+                                                                  pr_id))
+        return
+
     author = message['pull_request']['user']['login']
 
     target_repo_owner = message['pull_request']['base']['repo']['owner']['login']
