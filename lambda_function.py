@@ -109,14 +109,19 @@ def lambda_handler(event, context, debug=False):
 
     if config.commit_status:
         repo = gh.repository(base_repo_owner, base_repo)
-        sha = list(pr.commits())[-1].sha
+        last_commit = list(pr.commits())[-1]
+        current_statuses = set(status.context for status
+                               in last_commit.statuses())
 
         for context, description in config.commit_status.items():
-            if debug:
+            if context in current_statuses:
+                print('Skipping setting commit status {}, already set.'.format(
+                    context))
+            elif debug:
                 print('Settting {} status {} to {}: {}'.format(
-                    sha, context, 'pending', description))
+                    last_commit.sha, context, 'pending', description))
             else:
-                repo.create_status(sha, 'pending', context=context,
+                repo.create_status(last_commit.sha, 'pending', context=context,
                                    description=description)
 
     print('Handled pull request {}'.format(pr_id))
