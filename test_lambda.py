@@ -1,9 +1,9 @@
 import lambda_function
 
-import config
-
-pr_id = 2324
+pr_id = 1807
 pr_author = 'balloob'
+repo_owner = 'home-assistant'
+repo = 'home-assistant'
 base_branch = 'release/78'
 head_branch = 'feature/fix-X'
 
@@ -425,8 +425,8 @@ github_event = """
 for search, replace in {
   'pr_id': str(pr_id),
   'pr_author': pr_author,
-  'repo_owner': config.repo_owner,
-  'repo': config.repo,
+  'repo_owner': repo_owner,
+  'repo': repo,
   'base_branch': base_branch,
   'head_branch': head_branch,
 }.items():

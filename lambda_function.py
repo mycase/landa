@@ -1,13 +1,24 @@
 from __future__ import print_function
 
 from fnmatch import fnmatch
+from chainmap import ChainMap
 import json
 
 import auth
 import config
 
-VERBOSE = False
+config.repos = {key.lower(): value for key, value in config.repos.items()}
 
+VERBOSE = False
+EMPTY_REPO_CONFIG = {
+    'ignore_login': [],
+    'ignore_base_branch': [],
+    'team_labels': {},
+    'file_pattern_labels': {},
+    'base_branch_labels': {},
+    'head_branch_labels': {},
+    'commit_status': {}
+}
 
 def lambda_handler(event, context, debug=False):
     if debug:
@@ -47,20 +58,27 @@ def lambda_handler(event, context, debug=False):
 
     base_repo_owner = message['pull_request']['base']['repo']['owner']['login']
     base_repo = message['pull_request']['base']['repo']['name']
+    base_repo_full_name = message['pull_request']['base']['repo']['full_name']
+
     base_branch = message['pull_request']['base']['ref']
     head_branch = message['pull_request']['head']['ref']
 
-    if base_repo_owner != config.repo_owner or base_repo != config.repo:
-        print("Got event for unexpected repo {}/{}".format(
-            base_repo_owner, base_repo))
+    if base_repo_full_name.lower() not in config.repos:
+        print("Got event for unexpected repo {}".format(base_repo_full_name))
         return
 
-    if base_branch in config.ignore_base_branch:
+    repo_config = ChainMap(
+        config.repos[base_repo_full_name.lower()],
+        config.default,
+        EMPTY_REPO_CONFIG
+    )
+
+    if base_branch in repo_config['ignore_base_branch']:
         print('PR {} is targetting {} branch, aborting'.format(pr_id,
                                                                base_branch))
         return
 
-    if author in config.ignore_login:
+    if author in repo_config['ignore_login']:
         print('Ignoring pull request {} from {}'.format(pr_id, author))
         return
 
@@ -74,20 +92,20 @@ def lambda_handler(event, context, debug=False):
     # Calculate which labels to add and remove
     # Team Labels
     label_tests = {label: (author in users) for label, users
-                   in config.team_labels.items()}
+                   in repo_config['team_labels'].items()}
     # File Pattern Labels
     label_tests.update(
         {label: any(fnmatch(pfile.filename, pattern) for pfile
                     in files_changed) or label_tests.get(label, False)
-         for label, pattern in config.file_pattern_labels.items()})
+         for label, pattern in repo_config['file_pattern_labels'].items()})
     # Base Branch Labels
     label_tests.update(
         {label: fnmatch(base_branch, pattern) or label_tests.get(label, False)
-         for label, pattern in config.base_branch_labels.items()})
+         for label, pattern in repo_config['base_branch_labels'].items()})
     # Head Branch Labels
     label_tests.update(
         {label: fnmatch(head_branch, pattern) or label_tests.get(label, False)
-         for label, pattern in config.head_branch_labels.items()})
+         for label, pattern in repo_config['head_branch_labels'].items()})
 
     # Find labels to remove:
     remove_labels = current_labels & set(label for label, to_add
@@ -107,13 +125,13 @@ def lambda_handler(event, context, debug=False):
         if not debug:
             issue.replace_labels(list(new_labels))
 
-    if config.commit_status:
+    if repo_config['commit_status']:
         repo = gh.repository(base_repo_owner, base_repo)
         last_commit = list(pr.commits())[-1]
         current_statuses = set(status.context for status
                                in last_commit.statuses())
 
-        for context, description in config.commit_status.items():
+        for context, description in repo_config['commit_status'].items():
             if context in current_statuses:
                 print('Skipping setting commit status {}, already set.'.format(
                     context))
