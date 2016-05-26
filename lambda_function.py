@@ -1,13 +1,16 @@
 from __future__ import print_function
 
 from fnmatch import fnmatch
+from chainmap import ChainMap
 import json
 
 import auth
 import config
 
+config.repos = {key.lower(): value for key, value in config.repos.items()}
+
 VERBOSE = False
-BASE_REPO_CONFIG = {
+EMPTY_REPO_CONFIG = {
     'ignore_login': [],
     'ignore_base_branch': [],
     'team_labels': {},
@@ -60,12 +63,15 @@ def lambda_handler(event, context, debug=False):
     base_branch = message['pull_request']['base']['ref']
     head_branch = message['pull_request']['head']['ref']
 
-    if base_repo_full_name not in config.repos:
+    if base_repo_full_name.lower() not in config.repos:
         print("Got event for unexpected repo {}".format(base_repo_full_name))
         return
 
-    repo_config = BASE_REPO_CONFIG.copy()
-    repo_config.update(config.repos[base_repo_full_name])
+    repo_config = ChainMap(
+        config.repos[base_repo_full_name.lower()],
+        config.default,
+        EMPTY_REPO_CONFIG
+    )
 
     if base_branch in repo_config['ignore_base_branch']:
         print('PR {} is targetting {} branch, aborting'.format(pr_id,

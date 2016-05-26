@@ -2,6 +2,15 @@
 # Base branch is the targetted branch
 # Head branch is the branch with changes
 
+# default configuration for all repos
+default = {
+  'team_labels': {
+    '#Lame': [
+      'balloob'
+    ]
+  }
+}
+
 repos = {
   # owner/repo to monitor
   'robertmaloney/LandaTest': {
