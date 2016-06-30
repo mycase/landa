@@ -2,7 +2,6 @@ cd "$(dirname "$0")/.."
 
 mkdir build
 mkdir dependencies
-# python -m pip install github3.py==1.0.0a2 -t dependencies
 # Fix some OpenSSL El Capitain stuff
 # Make sure you have: brew install openssl
 env LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" python -m pip install github3.py==1.0.0a2 chainmap==1.0.2 -t dependencies
