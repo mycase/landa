@@ -20,6 +20,7 @@ EMPTY_REPO_CONFIG = {
     'commit_status': {}
 }
 
+
 def lambda_handler(event, context, debug=False):
     if debug:
         import os
@@ -93,11 +94,23 @@ def lambda_handler(event, context, debug=False):
     # Team Labels
     label_tests = {label: (author in users) for label, users
                    in repo_config['team_labels'].items()}
+
     # File Pattern Labels
-    label_tests.update(
-        {label: any(fnmatch(pfile.filename, pattern) for pfile
-                    in files_changed) or label_tests.get(label, False)
-         for label, pattern in repo_config['file_pattern_labels'].items()})
+    for label, patterns in repo_config['file_pattern_labels'].items():
+        label_tests[label] = False
+
+        if isinstance(patterns, str):
+            patterns = [patterns]
+
+        for pattern in patterns:
+            if any(fnmatch(pfile.filename, pattern) for pfile
+                   in files_changed):
+                label_tests[label] = True
+                break
+
+        if label_tests[label]:
+            continue
+
     # Base Branch Labels
     label_tests.update(
         {label: fnmatch(base_branch, pattern) or label_tests.get(label, False)

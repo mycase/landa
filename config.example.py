@@ -31,6 +31,7 @@ repos = {
       'db_review': 'db/*',
       'css_review': 'app/assets/stylesheets/global/*',
       'js_review': 'node_modules/*',
+      'ops_review': ['config/nginx/*', 'config/settings/*']
     },
     'base_branch_labels': {
       'release/*': 'trolololol',
