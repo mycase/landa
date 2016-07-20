@@ -61,6 +61,10 @@ def lambda_handler(event, context, debug=False):
     base_repo = message['pull_request']['base']['repo']['name']
     base_repo_full_name = message['pull_request']['base']['repo']['full_name']
 
+    head_repo_owner = message['pull_request']['head']['repo']['owner']['login']
+    head_repo = message['pull_request']['head']['repo']['name']
+    head_sha = message['pull_request']['head']['sha']
+
     base_branch = message['pull_request']['base']['ref']
     head_branch = message['pull_request']['head']['ref']
 
@@ -87,6 +91,9 @@ def lambda_handler(event, context, debug=False):
 
     issue = gh.issue(base_repo_owner, base_repo, pr_id)
     pr = gh.pull_request(base_repo_owner, base_repo, pr_id)
+    head_repo = gh.repository(head_repo_owner, head_repo)
+    head_commit = head_repo.commit(head_sha)
+
     files_changed = pr.files()
     current_labels = set(str(l) for l in issue.original_labels)
 
@@ -140,9 +147,8 @@ def lambda_handler(event, context, debug=False):
 
     if repo_config['commit_status']:
         repo = gh.repository(base_repo_owner, base_repo)
-        last_commit = list(pr.commits())[-1]
         current_statuses = set(status.context for status
-                               in last_commit.statuses())
+                               in head_commit.statuses())
 
         for context, description in repo_config['commit_status'].items():
             if context in current_statuses:
@@ -150,9 +156,9 @@ def lambda_handler(event, context, debug=False):
                     context))
             elif debug:
                 print('Settting {} status {} to {}: {}'.format(
-                    last_commit.sha, context, 'pending', description))
+                    head_commit.sha, context, 'pending', description))
             else:
-                repo.create_status(last_commit.sha, 'pending', context=context,
+                repo.create_status(head_commit.sha, 'pending', context=context,
                                    description=description)
 
     print('Handled pull request {}'.format(pr_id))

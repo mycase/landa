@@ -6,6 +6,7 @@ repo_owner = 'home-assistant'
 repo = 'home-assistant'
 base_branch = 'release/78'
 head_branch = 'feature/fix-X'
+head_sha = '4023021b216a8792f572b54ac892a7045ad8951b'
 
 github_event = """
 {
@@ -53,11 +54,11 @@ github_event = """
     "review_comments_url": "https://api.github.com/repos/{repo_owner}/{repo}/pulls/1/comments",
     "review_comment_url": "https://api.github.com/repos/{repo_owner}/{repo}/pulls/comments{/number}",
     "comments_url": "https://api.github.com/repos/{repo_owner}/{repo}/issues/1/comments",
-    "statuses_url": "https://api.github.com/repos/{repo_owner}/{repo}/statuses/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+    "statuses_url": "https://api.github.com/repos/{repo_owner}/{repo}/statuses/{head_sha}",
     "head": {
       "label": "{pr_author}:{head_branch}",
       "ref": "{head_branch}",
-      "sha": "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+      "sha": "{head_sha}",
       "user": {
         "login": "{pr_author}",
         "id": 6752317,
@@ -299,7 +300,7 @@ github_event = """
         "href": "https://api.github.com/repos/{repo_owner}/{repo}/pulls/1/commits"
       },
       "statuses": {
-        "href": "https://api.github.com/repos/{repo_owner}/{repo}/statuses/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c"
+        "href": "https://api.github.com/repos/{repo_owner}/{repo}/statuses/{head_sha}"
       }
     },
     "merged": false,
@@ -429,6 +430,7 @@ for search, replace in {
   'repo': repo,
   'base_branch': base_branch,
   'head_branch': head_branch,
+  'head_sha': head_sha,
 }.items():
     github_event = github_event.replace('{' + search + '}', replace)
 
