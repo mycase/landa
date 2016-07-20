@@ -13,7 +13,7 @@ default = {
 
 repos = {
   # owner/repo to monitor
-  'robertmaloney/LandaTest': {
+  'home-assistant/home-assistant': {
     # PRs from these users are ignored
     'ignore_login': ['example_user'],
     # PRs targetting these branches are ignored
