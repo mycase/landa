@@ -2,6 +2,8 @@
 # Base branch is the targetted branch
 # Head branch is the branch with changes
 
+import re
+
 # default configuration for all repos
 default = {
   'team_labels': {
@@ -31,7 +33,9 @@ repos = {
       'db_review': 'db/*',
       'css_review': 'app/assets/stylesheets/global/*',
       'js_review': 'node_modules/*',
-      'ops_review': ['config/nginx/*', 'config/settings/*']
+      'ops_review': ['config/nginx/*', 'config/settings/*'],
+      # Only matches files in this folder, not any subfolder
+      'test_review': re.compile(r'test\/[a-z_]+.rb'),
     },
     'base_branch_labels': {
       'release/*': 'trolololol',
