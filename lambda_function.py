@@ -110,8 +110,14 @@ def lambda_handler(event, context, debug=False):
             patterns = [patterns]
 
         for pattern in patterns:
-            if any(fnmatch(pfile.filename, pattern) for pfile
-                   in files_changed):
+            if isinstance(pattern, str):
+                match = any(fnmatch(pfile.filename, pattern) for pfile
+                            in files_changed)
+            else:
+                match = any(pattern.match(pfile.filename) is not None for pfile
+                            in files_changed)
+
+            if match:
                 label_tests[label] = True
                 break
 
