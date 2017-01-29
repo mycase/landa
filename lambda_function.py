@@ -145,10 +145,17 @@ def lambda_handler(event, context, debug=False):
     new_labels = (current_labels - remove_labels) | add_labels
 
     if new_labels != current_labels:
-        print('Changing labels on PR#{0} from {1} to {2}'.format(
-            pr.number, ', '.join(current_labels), ', '.join(new_labels)))
+        print('Changing labels on PR#{0}.'.format(pr.number))
+        if add_labels:
+            print('Adding {0}'.format(', '.join(add_labels)))
+        if remove_labels:
+            print('Removing {0}'.format(','.join(remove_labels)))
 
         if not debug:
+            if add_labels:
+                issue.add_labels(*add_labels)
+            for label in remove_labels:
+                issue.remove_label(label)
             issue.replace_labels(list(new_labels))
 
     if repo_config['commit_status']:
