@@ -1,7 +1,7 @@
 cd "$(dirname "$0")/.."
 
 rm -rf build/*
-zip -r build/upload.zip auth.py config.py lambda_function.py
+zip -r build/upload.zip config.py lambda_function.py
 cd dependencies
 zip -r ../build/upload.zip *
 cd ..
