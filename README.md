@@ -15,13 +15,14 @@ Landa runs on AWS Lambda using Python 2.7. It uses GitHub webhooks as triggers.
 ## Getting started
 
  - Create a Python 2.7 lambda function in AWS and enable the API gateway for this function.
+ - For the Python 2.7 lambda function, set up the following environment variables GH_USER and GH_TOKEN ([create token here](https://github.com/settings/tokens)).
  - On GitHub, go to your repo settings -> Webhooks & Services -> Add webhook:
     - Payload URL: the URL of your lambda function
     - Content type: application/json
     - Secret: <empty>
     - Which events: click "Let me select individual events" and make sure only "Pull Requests" is selected.
     - Active: checked
- - Clone the repo and copy `auth.example.py` to `auth.py` and `config.example.py` to `config.py` and adjust appropriately.
+ - Clone the repo and copy `config.example.py` to `config.py` and adjust appropriately.
  - Run `script/setup` to install the dependencies.
  - Adjust `script/deploy` to match your Lambda function name
  - Install AWS-cli: `pip install awscli`

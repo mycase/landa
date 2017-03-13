@@ -3,8 +3,8 @@ from __future__ import print_function
 from fnmatch import fnmatch
 from chainmap import ChainMap
 import json
+import os
 
-import auth
 import config
 
 config.repos = {key.lower(): value for key, value in config.repos.items()}
@@ -19,11 +19,17 @@ EMPTY_REPO_CONFIG = {
     'head_branch_labels': {},
     'commit_status': {}
 }
+ENV_KEYS = ['GH_USER', 'GH_TOKEN']
 
 
 def lambda_handler(event, context, debug=False):
+    missing = [key for key in ENV_KEYS if key not in os.environ]
+
+    if missing:
+        print('Missing required environment keys:', ', '.join(missing))
+        return
+
     if debug:
-        import os
         import sys
         sys.path.insert(0, os.path.join(os.path.dirname(__file__),
                         'dependencies'))
@@ -87,7 +93,7 @@ def lambda_handler(event, context, debug=False):
         print('Ignoring pull request {} from {}'.format(pr_id, author))
         return
 
-    gh = login(auth.user, password=auth.token)
+    gh = login(os.environ['GH_USER'], password=os.environ['GH_TOKEN'])
 
     issue = gh.issue(base_repo_owner, base_repo, pr_id)
     pr = gh.pull_request(base_repo_owner, base_repo, pr_id)
