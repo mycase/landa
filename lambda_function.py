@@ -162,7 +162,6 @@ def lambda_handler(event, context, debug=False):
                 issue.add_labels(*add_labels)
             for label in remove_labels:
                 issue.remove_label(label)
-            issue.replace_labels(list(new_labels))
 
     if repo_config['commit_status']:
         repo = gh.repository(base_repo_owner, base_repo)
